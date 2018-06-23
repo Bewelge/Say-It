@@ -1,0 +1,122 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin:0;
+  padding:0;
+  background-color: black;
+}
+h1 {
+  text-align: center;
+  color: white;
+}
+#overlay {
+  background-color: rgba(50,50,50,1);
+  z-index: 1001;
+  text-align: center;
+}
+.line {
+  width:100%;
+  text-align: center;
+  color: white;
+}
+#endScreen {
+  background-color: rgba(50,50,50,1);
+  border-top-right-radius: 1em;
+  border-top-left-radius:1em;
+  box-shadow:0em 0em 0.2em 0em rgba(255,255,255,0.5);
+}
+.button {
+  border-radius:0.1em;
+  width:90%;
+  text-align: center;
+  margin-top:10%;
+  color: white;
+  margin-left:5%;
+  font-size: 2em;
+  background-color: rgba(150,150,150,0.5);
+  box-shadow: 0em 0em 0.2em 0.3em rgba(0,0,0,0.2);
+}
+.button:hover {
+  background-color: rgba(250,250,250,0.5);
+}
+#Canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#lives {
+  position: absolute;
+  top:5%;
+  left: 5%;
+}
+.live {
+  background-image: url('img/heart2.png');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  height:50px;
+  width:50px;
+  float: left;
+}
+#Bg1 {
+
+  background-color: rgba(50,50,50,0.3);
+  height:25%;
+  top:25%;
+  width:100%;
+  position: absolute;
+  box-shadow:inset 0em 0.2em 0.2em 0em rgba(255,255,255,0.5);
+
+}
+#BgDiv1 {
+  color:white;
+text-align: center;
+  line-height:250%;
+  font-size: 2em;
+  height:25%;
+  top:25%;
+  width:100%;
+  position: absolute;
+}
+#Bg2 {
+
+  background-color: rgba(50,50,50,0.5);
+  height:25%;
+  top:50%;
+  width:100%;
+  position: absolute;
+  box-shadow:inset 0em 0.2em 0.2em 0em rgba(255,255,255,0.5);
+
+}
+#BgDiv2 {
+  color:white;
+text-align: center;
+  line-height:250%;
+  font-size: 2em;
+  height:25%;
+  top:50%;
+  width:100%;
+  position: absolute;
+
+  z-index: 100;
+}
+#Bg3 {
+
+  background-color: rgba(50,50,50,0.7);
+  height:25%;
+  top:75%;
+  width:100%;
+  position: absolute;
+  box-shadow:inset 0em 0.2em 0.2em 0em rgba(255,255,255,0.5);
+
+}
+#BgDiv3 {
+  color:white;
+text-align: center;
+  line-height:250%;
+  font-size: 2em;
+  height:25%;
+  top:75%;
+  width:100%;
+  position: absolute;
+  z-index: 100;
+}
