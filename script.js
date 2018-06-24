@@ -39,7 +39,8 @@ var ctx;
 var width, height, lMarg, rMarg, hheight, hwidth, diagLng;
 var gameOver = true;
 var overlay, endScreen;
-
+var synth ;
+  var voices ;
 function init() {
   width = window.innerWidth || document.documentElement.clientWidth / 1 || document.body.clientWidth;
   height = window.innerHeight || document.documentElement.clientHeight / 1 || document.body.clientHeight / 1;
@@ -58,10 +59,24 @@ function init() {
   } catch (e) {
     console.log("couldnt load a highscore");
   }
+  synth = window.speechSynthesis;
+  voices = [];
+  voices = synth.getVoices()
+  console.log(voices);
+  console.log(synth);
+  
+  speak(0.5,1,"Welcome To the game, Player!" )
+   
   showMenu();
 }
 window.onLoad = init();
-
+function speak(pitch,rate,txt) {
+  var utterThis = new SpeechSynthesisUtterance(txt);
+  utterThis.voice = voices[1];
+  utterThis.pitch = pitch;
+  utterThis.rate = rate;
+  synth.speak(utterThis);
+}
 function tick() {
   let now = window.performance.now();
   ticker += now - lastTick;
@@ -118,7 +133,7 @@ function showMenu() {
       left: "0px",
       top: "0%",
     }, {
-      innerHTML: "<div class='title'></div> <div id='playBut' class='button' onclick='startGame()'> Play !</div>",
+      innerHTML: "<div class='title'></div> <div id='playBut' class='button' onclick='startGame()'> Start Game</div>",
     })
     document.body.appendChild(overlay)
   }
@@ -132,11 +147,12 @@ function loseGame() {
   openEndScreen();
   recognition.stop();
 
-  sounds.gameOver.play(aCtx.currentTime, 1);
+ // sounds.gameOver.play(aCtx.currentTime, 1);
   gameOver = true;
 };
 
 function openEndScreen() {
+  speak(0.5,1,"Game! Over!")
   if (!endScreen) {
     endScreen = createDiv("endScreen", "endScreen", {
       width: "80%",
@@ -159,14 +175,20 @@ function openEndScreen() {
     }, {
       innerHTML: "Play Again",
     })
-    again.addEventListener("click", startGame);
+    again.addEventListener("click", function() {
+      speak(0.5,1,"Play Again!")
+      startGame()
+    });
 
     let menu = createDiv("again", "button", {
 
     }, {
-      innerHTML: "Menu",
+      innerHTML: "Main Menu",
     })
-    menu.addEventListener("click", showMenu);
+    menu.addEventListener("click", function() {
+      speak(0.5,1,"Main Menu!")
+      showMenu()
+    });
 
     let hsc = createDiv("Highscore", "line", {
       fontSize: "1.5em",
@@ -227,6 +249,7 @@ function dontstartGame() {
   console.log("Dont Click... Say It!")
 }
 function startGame() {
+  speak(0.5,1,"Start Game!")
   if (gameOver) {
     recognition.start();
     timerStart = event.timeStamp;
@@ -314,7 +337,7 @@ recognition.onerror = function(event) {
   /*console.log('Error occurred in recognition: ' + event.error);*/
 }
 var fillColors = {
-  green:"rgba(15,255,15,1)",
+  green:"rgba(15,166,15,1)",
   blue:"rgba(15,58,155,1)",
   red:"rgba(155,18,15,1)",
   yellow:"rgba(155,158,15,1)"
@@ -365,15 +388,16 @@ function activeWord(opt) {
   let c = this.img.getContext("2d");
   c.save();
     c.fillStyle = fillColors[this.color];
-    
+    c.strokeStyle="rgba(0,0,0,1)"
+    c.lineWidth=5;
 
     let x = (1 - this.dur) * width * 0.9;
     let y = 0;
     let w,h;
     let tx = this.text;
     c.font = 0.2 * siz + "px Arial black";
-    c.shadowColor="rgba(255,255,255,0.5)";
-    c.shadowBlur = 10;
+    c.shadowColor="rgba(155,155,155,1)";
+    c.shadowBlur = 5;
     let wd = c.measureText(tx).width;
     switch (this.shape) {
       case "triangle":
@@ -403,6 +427,7 @@ function activeWord(opt) {
       c.moveTo(0.75 * siz,       0.75*siz-h/2 );
       c.lineTo(0.75 * siz-w*0.5, 0.75*siz+h/2);
       c.lineTo(0.75 * siz+w*0.5, 0.75*siz+h/2);
+      c.closePath();
     } else if (this.shape == "circle") {
       c.arc(0.75 * siz, 0.75*siz, w, 0, Math.PI * 2, 0);
     } else {
@@ -462,24 +487,24 @@ function draw() {
     ctx.drawImage(activeWords[i].img,0,0-siz*0.75,siz*1.5*scx,siz*1.5)
     ctx.restore();
   }
-  ctx.strokeStyle = "rgba(255,0,0,0.5)";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(width * 1, height * 0.25);
-  ctx.lineTo(width * 1, height);
-  ctx.stroke();
-  ctx.closePath();
+  // ctx.strokeStyle = "rgba(255,0,0,0.5)";
+  // ctx.lineWidth = 5;
+  // ctx.beginPath();
+  // ctx.moveTo(width * 1, height * 0.25);
+  // ctx.lineTo(width * 1, height);
+  // ctx.stroke();
+  // ctx.closePath();
   ctx.fillStyle = "white";
   ctx.font = "25px Arial white";
   let tx = lastRegistered;
   let wd = ctx.measureText(tx).width;
   ctx.fillText(tx, width / 2 - wd / 2, height * 0.225);
 
-  ctx.font = "20px Arial white";
-  ctx.fillText(Math.floor(10 * score) / 10, width * 1.5 / 5, height * 0.1+ height*0.05);
+  ctx.font = "25px Arial white";
+  ctx.fillText(Math.floor(10 * score) / 10, width * 0.5 / 5, height * 0.1+ height*0.05);
 
-  ctx.font = "16px Arial white";
-  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 1.5 / 5-5, height * 0.1+ height*0.05+22);
+  ctx.font = "14px Arial white";
+  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 0.5 / 5-5, height * 0.1+ height*0.05+27);
 
 
 }
