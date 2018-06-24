@@ -476,10 +476,10 @@ function draw() {
   ctx.fillText(tx, width / 2 - wd / 2, height * 0.225);
 
   ctx.font = "20px Arial white";
-  ctx.fillText(Math.floor(10 * score) / 10, width * 4.5 / 5, height * 0.1+ height*0.05);
+  ctx.fillText(Math.floor(10 * score) / 10, width * 1.5 / 5, height * 0.1+ height*0.05);
 
   ctx.font = "16px Arial white";
-  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 4.5 / 5-5, height * 0.1+ height*0.05+22);
+  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 1.5 / 5-5, height * 0.1+ height*0.05+22);
 
 
 }
