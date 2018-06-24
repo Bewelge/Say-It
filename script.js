@@ -242,7 +242,7 @@ function startGame() {
     gameOver = false;
     lastTick = window.performance.now();
     window.setTimeout(tick, 500);
-    console.log('Ready to receive a color command.');
+    console.log('Ready to receive a command.');
 
   }
 }
@@ -254,6 +254,7 @@ var lastResultStr = "";
 var lastResultTime = 0;
 var lastRegistered = "";
 recognition.onresult = function(event) {
+  console.log(event);
   timer = event.timeStamp - timerStart;
   // timerEl.innerHTML = Math.floor(timer / 100) / 10;
   let finals = "";
@@ -313,7 +314,7 @@ recognition.onerror = function(event) {
   /*console.log('Error occurred in recognition: ' + event.error);*/
 }
 var fillColors = {
-  green:"rgba(155,188,15,1)",
+  green:"rgba(15,255,15,1)",
   blue:"rgba(15,58,155,1)",
   red:"rgba(155,18,15,1)",
   yellow:"rgba(155,158,15,1)"
@@ -427,10 +428,10 @@ function draw() {
   let siz = height * 0.125;
   for (let i = activeWords.length - 1; i >= 0; i--) {
     ctx.save();
-    ctx.fillStyle = activeWords[i].color;
-    if (activeWords[i].color == "blue") {
-      ctx.fillStyle = "rgba(50,50,255,1)";
-    }
+    // ctx.fillStyle = activeWords[i].color;
+    // if (activeWords[i].color == "blue") {
+    //   ctx.fillStyle = "rgba(50,50,255,1)";
+    // }
     
     let x = Math.max(activeWords[i].xwd*0.5,(1 - activeWords[i].dur) * width * 1);
     let y = 0;
@@ -469,11 +470,12 @@ function draw() {
   ctx.stroke();
   ctx.closePath();
   ctx.fillStyle = "white";
-  ctx.font = "20px Arial white";
+  ctx.font = "25px Arial white";
   let tx = lastRegistered;
   let wd = ctx.measureText(tx).width;
   ctx.fillText(tx, width / 2 - wd / 2, height * 0.225);
 
+  ctx.font = "20px Arial white";
   ctx.fillText(Math.floor(10 * score) / 10, width * 4.5 / 5, height * 0.1+ height*0.05);
 
   ctx.font = "16px Arial white";
