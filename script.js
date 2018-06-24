@@ -133,7 +133,7 @@ function showMenu() {
       left: "0px",
       top: "0%",
     }, {
-      innerHTML: "<div class='title'></div> <div id='playBut' class='button' onclick='startGame()'> Start Game</div>",
+      innerHTML: "<div class='title'></div> <div id='playBut' class='button' onclick='startGame()'> Start Game</div><div class='descr'>This game requires a microphone to work. </br> You have to give your browser permission to use your Microphone for it to work.</br> </br> Game Instructions:</br>Your objective is to kill shapes by saying the correct word. </br> Depending on the row its on you have to speak its Shape, Color, or Text.</div>",
     })
     document.body.appendChild(overlay)
   }
