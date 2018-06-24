@@ -248,7 +248,7 @@ function startGame() {
 }
 
 recognition.onspeechstart = function(event) {
-  /*console.log('Speech has been detected');*/
+  console.log('Speech has been detected');
 }
 var lastResultStr = "";
 var lastResultTime = 0;
