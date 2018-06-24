@@ -29,7 +29,6 @@ var highestScore = 0;
 var difficulty = 0;
 var timerDone = 0;
 var timerStart = -1;
-/*var timerEl = document.getElementById("timer");*/
 var ticker = 0;
 var lastTick = 0;
 var lastSpawn = 0;
@@ -55,7 +54,7 @@ function init() {
   cnv.height = height;
   ctx = cnv.getContext("2d");
   try {
-    highestScore = window.localStorage.getItem("SpeakUpHighscore");
+    highestScore = window.localStorage.getItem("SayItHighscore");
   } catch (e) {
     console.log("couldnt load a highscore");
   }
@@ -82,9 +81,10 @@ function tick() {
 function step() {
   for (let i = activeWords.length - 1; i >= 0; i--) {
     if (!activeWords[i].dead) {
-      activeWords[i].dur -= 1 / 60 / (7 / (difficulty + 1));
-      if (activeWords[i].dur <= 0) {
-        activeWords.splice(i, 1);
+      activeWords[i].dur -= 0.01 / (7 / (difficulty + 1));
+      if (activeWords[i].dur <= activeWords[i].xwd/width) {
+        //activeWords.splice(i, 1);
+        activeWords[i].dead = true;
         difficulty = 0;
         $("#live" + lives).fadeOut();
         sounds.dead.play(aCtx.currentTime, 1);
@@ -116,13 +116,15 @@ function showMenu() {
       height: "100%",
       position: "absolute",
       left: "0px",
-      top: "0px",
+      top: "0%",
     }, {
-      innerHTML: "<h1>Speak Up!</h1> <div class='button' onclick='startGame()'> Play !</div>",
+      innerHTML: "<div class='title'></div> <div id='playBut' class='button' onclick='startGame()'> Play !</div>",
     })
     document.body.appendChild(overlay)
   }
   $("#overlay").fadeIn();
+
+
 
 }
 
@@ -139,7 +141,7 @@ function openEndScreen() {
     endScreen = createDiv("endScreen", "endScreen", {
       width: "80%",
       height: "80%",
-      top: "20%",
+      top: "100%",
       left: "10%",
       position: "absolute",
       zIndex: 1000,
@@ -149,7 +151,7 @@ function openEndScreen() {
     let sc = createDiv("score", "line", {
 
     }, {
-      innerHTML: "Final Score: " + score,
+      innerHTML: "Final Score: " + nF(score),
     })
 
     let again = createDiv("again", "button", {
@@ -170,7 +172,7 @@ function openEndScreen() {
       fontSize: "1.5em",
       marginTop: "5%",
     }, {
-      innerHTML: "HighScore: " + highestScore,
+      innerHTML: "HighScore: " + nF(highestScore),
     })
 
     endScreen.appendChild(sc);
@@ -179,16 +181,20 @@ function openEndScreen() {
     endScreen.appendChild(hsc);
     document.body.appendChild(endScreen)
 
+    $(endScreen).animate({
+      top:"10%"
+    })
+
   }
-  $("#score").html("Final Score: " + Math.floor(score));
+  $("#score").html("Final Score: " + nF(score));
   if (score > highestScore) {
     highestScore = score;
     try {
-      window.localStorage.setItem("SpeakUpHighscore", highestScore);
+      window.localStorage.setItem("SayItHighscore", nF(highestScore));
     } catch (e) {
       console.log("Couldn't Save Highscore.")
     }
-    $("#Highscore").html("HighScore: " + Math.floor(highestScore));
+    $("#Highscore").html("HighScore: " + nF(highestScore));
   }
   $("#endScreen").fadeIn();
 
@@ -207,12 +213,19 @@ function startTimer() {
     timerLoop = window.requestAnimationFrame(startTimer);
   }
 }
-
+function nF(num,dig) {
+  dig = dig || 0;
+  let exp = Math.pow(10,dig);
+  return Math.floor(exp * num)/exp
+}
 function stopTimer() {
   addHiscore("speeches", currentText.name, timer)
   timerStart = -1;
 }
 
+function dontstartGame() {
+  console.log("Dont Click... Say It!")
+}
 function startGame() {
   if (gameOver) {
     recognition.start();
@@ -299,7 +312,12 @@ recognition.onnomatch = function(event) {
 recognition.onerror = function(event) {
   /*console.log('Error occurred in recognition: ' + event.error);*/
 }
-
+var fillColors = {
+  green:"rgba(155,188,15,1)",
+  blue:"rgba(15,58,155,1)",
+  red:"rgba(155,18,15,1)",
+  yellow:"rgba(155,158,15,1)"
+}
 function spawnWord() {
 
   let col = colors[Math.floor(Math.random() * colors.length)];
@@ -311,19 +329,26 @@ function spawnWord() {
     sig = "color";
   } else if (rnd < 2 / 3) {
     sig = "shape";
-  } else {}
+  }
   createWord(col, shape, txt, sig);
 }
 
 function createWord(col, shape, txt, sig) {
   let opts = {
     dead: false,
-    dur: 1,
+    dur: 1.1,
     deadDur: 1,
     color: col,
     shape: shape,
     text: txt,
     sign: sig
+  }
+  if (opts.sign == "shape") {
+    opts.dur+=0.1
+
+  } else if (opts.sign == "text") {
+  } else if (opts.sign == "color") {
+    opts.dur+=0.2
   }
   activeWords.push(new activeWord(opts))
 }
@@ -332,10 +357,73 @@ function activeWord(opt) {
   for (let i in opt) {
     this[i] = opt[i];
   }
+  this.img = document.createElement("canvas");
+  let siz = height * 0.125;
+  this.img.width = siz*1.5;
+  this.img.height = siz*1.5;
+  let c = this.img.getContext("2d");
+  c.save();
+    c.fillStyle = fillColors[this.color];
+    
+
+    let x = (1 - this.dur) * width * 0.9;
+    let y = 0;
+    let w,h;
+    let tx = this.text;
+    c.font = 0.2 * siz + "px Arial black";
+    c.shadowColor="rgba(255,255,255,0.5)";
+    c.shadowBlur = 10;
+    let wd = c.measureText(tx).width;
+    switch (this.shape) {
+      case "triangle":
+        c.textBaseline = "bottom"
+        w = wd * 1.7;
+        h = w * 0.75;
+        y = siz*0.75+h/2;//height * 0.25 + height * 0.375
+        this.xwd = 0.75*siz+w/2
+        break;
+      case "circle":
+        w = wd * 0.6;
+        h = wd * 0.6;
+        this.xwd = 0.75*siz+w
+        c.textBaseline = "middle"
+        y = siz*0.75//height * 0.25 + height * 0.625
+        break;
+      case "square":
+        w = wd * 1.2
+        h = wd * 1.2
+        this.xwd = 0.75*siz+w/2
+        c.textBaseline = "middle"
+        y = siz*0.75//height * 0.25 + height * 0.125
+        break;
+    }
+    c.beginPath();
+    if (this.shape == "triangle") {
+      c.moveTo(0.75 * siz,       0.75*siz-h/2 );
+      c.lineTo(0.75 * siz-w*0.5, 0.75*siz+h/2);
+      c.lineTo(0.75 * siz+w*0.5, 0.75*siz+h/2);
+    } else if (this.shape == "circle") {
+      c.arc(0.75 * siz, 0.75*siz, w, 0, Math.PI * 2, 0);
+    } else {
+      c.rect(0.75*siz - w/2, 0.75 * siz - h/2, w, h);
+    }
+    c.stroke();
+    c.fill();
+    c.closePath();
+
+    c.fillStyle = "black";
+    
+    
+    c.fillText(tx,0.75 * siz - wd / 2, y);
+    c.restore();
+
 }
 
 function draw() {
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0,0, width, height);
+  //ctx.clearRect(0, height*0.25+height*0.125, width, height*0.25);
+  //ctx.clearRect(0, height*0.25+height*0.325, width, height*0.25);
+  //ctx.clearRect(0, height*0.25+height*0.625, width, height*0.25);
   let siz = height * 0.125;
   for (let i = activeWords.length - 1; i >= 0; i--) {
     ctx.save();
@@ -343,12 +431,8 @@ function draw() {
     if (activeWords[i].color == "blue") {
       ctx.fillStyle = "rgba(50,50,255,1)";
     }
-    if (activeWords[i].dead) {
-      ctx.globalAlpha = activeWords[i].deadDur;
-      ctx.rotate((1 - activeWords[i].deadDur) * 1 * Math.PI);
-    }
-
-    let x = (1 - activeWords[i].dur) * width * 0.9;
+    
+    let x = Math.max(activeWords[i].xwd*0.5,(1 - activeWords[i].dur) * width * 1);
     let y = 0;
     switch (activeWords[i].sign) {
       case "shape":
@@ -361,29 +445,27 @@ function draw() {
         y = height * 0.25 + height * 0.125
         break;
     }
-    ctx.beginPath();
-    if (activeWords[i].shape == "triangle") {
-      ctx.moveTo(x + 0.6 * siz, y - 0.6 * siz);
-      ctx.lineTo(x, y + 0.15 * siz);
-      ctx.lineTo(x + 1.2 * siz, y + 0.15 * siz);
-    } else if (activeWords[i].shape == "circle") {
-      ctx.arc(x + 0.6 * siz, y, 0.5 * siz, 0, Math.PI * 2, 0);
-    } else {
-      ctx.rect(x + 0.1 * siz, y - 0.5 * siz, siz, siz);
+    let scx = 1;
+    if (activeWords[i].dur > 1) {
+      y = y + (height - y) *  (activeWords[i].dur-1)/0.3
     }
-    ctx.fill();
-    ctx.closePath();
-    ctx.fillStyle = "black";
-    ctx.font = 0.2 * siz + "px Arial black";
-    let tx = activeWords[i].text;
-    let wd = ctx.measureText(tx).width;
-    ctx.fillText(tx, x + 0.6 * siz - wd / 2, y + 0.05 * siz);
+    // if ((activeWords[i].dur)>0.95) {
+    //   scx = 20*(Math.max(0.01,(activeWords[i].dur-0.95)/0.15 ));
+    // }
+    ctx.save();
+    ctx.translate(x,y)
+    if (activeWords[i].dead) {
+      ctx.globalAlpha = activeWords[i].deadDur;
+      ctx.rotate((1 - activeWords[i].deadDur) * 1 * Math.PI);
+    }
+    ctx.drawImage(activeWords[i].img,0,0-siz*0.75,siz*1.5*scx,siz*1.5)
     ctx.restore();
   }
-  ctx.strokeStyle = "red";
+  ctx.strokeStyle = "rgba(255,0,0,0.5)";
+  ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(width * 0.9, height * 0.25);
-  ctx.lineTo(width * 0.9, height);
+  ctx.moveTo(width * 1, height * 0.25);
+  ctx.lineTo(width * 1, height);
   ctx.stroke();
   ctx.closePath();
   ctx.fillStyle = "white";
@@ -392,9 +474,10 @@ function draw() {
   let wd = ctx.measureText(tx).width;
   ctx.fillText(tx, width / 2 - wd / 2, height * 0.225);
 
-  ctx.fillText(Math.floor(10 * score) / 10, width * 4 / 5, height * 0.0625);
+  ctx.fillText(Math.floor(10 * score) / 10, width * 4.5 / 5, height * 0.1+ height*0.05);
 
-  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 1 / 5, height * 0.0625);
+  ctx.font = "16px Arial white";
+  ctx.fillText("x" + Math.floor(10 * (difficulty + 1)) / 10, width * 4.5 / 5-5, height * 0.1+ height*0.05+22);
 
 
 }
@@ -507,10 +590,10 @@ var sounds = {
 
     set: function(o, g, cT, tT) {
       g.gain.setValueAtTime(0.0001, cT + tT * 0);
-      g.gain.linearRampToValueAtTime(0.25, cT + tT * 0.20722891566265061);
-      g.gain.setValueAtTime(0.25, cT + tT * 0.20722891566265061);
-      g.gain.exponentialRampToValueAtTime(0.25, cT + tT * 0.7);
-      g.gain.setValueAtTime(0.25, cT + tT * 0.7);
+      g.gain.linearRampToValueAtTime(0.125, cT + tT * 0.20722891566265061);
+      g.gain.setValueAtTime(0.125, cT + tT * 0.20722891566265061);
+      g.gain.exponentialRampToValueAtTime(0.125, cT + tT * 0.7);
+      g.gain.setValueAtTime(0.125, cT + tT * 0.7);
       g.gain.exponentialRampToValueAtTime(0.0001, cT + tT * 1);
       o.frequency.setValueAtTime(440, cT + tT * 0);
       o.frequency.exponentialRampToValueAtTime(440, cT + tT * 0.2);
