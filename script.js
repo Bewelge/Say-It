@@ -41,6 +41,8 @@ var gameOver = true;
 var overlay, endScreen;
 var synth ;
   var voices ;
+
+
 function init() {
   width = window.innerWidth || document.documentElement.clientWidth / 1 || document.body.clientWidth;
   height = window.innerHeight || document.documentElement.clientHeight / 1 || document.body.clientHeight / 1;
@@ -62,15 +64,19 @@ function init() {
   synth = window.speechSynthesis;
   voices = [];
   voices = synth.getVoices()
-  console.log(voices);
-  console.log(synth);
+  /*console.log(voices);
+  console.log(synth);*/
   
-  speak(0.5,1,"Welcome To the game, Player!" )
+  
+  speak(0.5,1,"Welcome To the game!" )
+  
    
   showMenu();
 }
 window.onLoad = init();
 function speak(pitch,rate,txt) {
+  if (muted) return;
+
   var utterThis = new SpeechSynthesisUtterance(txt);
   utterThis.voice = voices[1];
   utterThis.pitch = pitch;
@@ -96,13 +102,15 @@ function tick() {
 function step() {
   for (let i = activeWords.length - 1; i >= 0; i--) {
     if (!activeWords[i].dead) {
-      activeWords[i].dur -= 0.01 / (7 / (difficulty + 1));
+      activeWords[i].dur -= 0.01 / (7 / (Math.min(7,difficulty + 1)));
       if (activeWords[i].dur <= activeWords[i].xwd/width) {
         //activeWords.splice(i, 1);
         activeWords[i].dead = true;
         difficulty = 0;
         $("#live" + lives).fadeOut();
-        sounds.dead.play(aCtx.currentTime, 1);
+        if (!muted) {
+          sounds.dead.play(aCtx.currentTime, 1);
+        }
         lives--;
 
         if (lives <= 0) {
@@ -265,7 +273,7 @@ function startGame() {
     gameOver = false;
     lastTick = window.performance.now();
     window.setTimeout(tick, 500);
-    console.log('Ready to receive a command.');
+    /*console.log('Ready to receive a command.');*/
 
   }
 }
@@ -277,15 +285,13 @@ var lastResultStr = "";
 var lastResultTime = 0;
 var lastRegistered = "";
 recognition.onresult = function(event) {
-  console.log(event);
+  
   timer = event.timeStamp - timerStart;
-  // timerEl.innerHTML = Math.floor(timer / 100) / 10;
   let finals = "";
   let interim = "";
   let last = event.results.length - 1;
   let last2 = event.results[last].length - 1;
-  /*console.log(event);*/
-  /*for (let j = 0;j<event.results.length;j++) {*/
+  
   let trans = event.results[last][last2].transcript.split(" ");
   lastRegistered = event.results[last][last2].transcript;
   for (let k = trans.length - 1; k >= 0; k--) {
@@ -305,8 +311,10 @@ recognition.onresult = function(event) {
           lastRegistered = words[i];
           lastResultStr = words[i].toLowerCase();
           lastResultTime = event.timeStamp;
-          sounds.kill.play(aCtx.currentTime,1);
-          score += 10 * (difficulty + 1);
+          if (!muted) {
+            sounds.kill.play(aCtx.currentTime,1);
+          }
+          score += Math.ceil(10 * (difficulty + 1));
           difficulty += (difficulty + 1) * 0.1;
           //activeWords.splice(str,1);
           recognition.stop();
@@ -318,6 +326,17 @@ recognition.onresult = function(event) {
 
   }
 
+
+}
+var muted=false;
+function mute() {
+  if (muted) {
+    muted=false;
+    document.getElementById("mute").innerHTML = "Mute";
+  } else {
+    muted=true;
+    document.getElementById("mute").innerHTML = "<del>Mute</del>";
+  }
 }
 recognition.onend = function() {
   if (!gameOver) {
@@ -326,7 +345,7 @@ recognition.onend = function() {
   }
 }
 recognition.onspeechend = function() {
-  console.log("speech has ended");
+  //console.log("speech has ended");
 }
 
 recognition.onnomatch = function(event) {
@@ -564,7 +583,7 @@ var sounds = {
       o.start(cT);
       o.stop(cT + tT);
       o.onend = function() {
-        console.log("ended");
+        //console.log("ended");
       }
     },
     load: function() {
@@ -604,7 +623,7 @@ var sounds = {
       o.start(cT);
       o.stop(cT + tT);
       o.onend = function() {
-        console.log("ended");
+        //console.log("ended");
       }
     },
     load: function() {
@@ -650,7 +669,7 @@ var sounds = {
       o.start(cT);
       o.stop(cT + tT);
       o.onend = function() {
-        console.log("ended");
+       // console.log("ended");
       }
     },
     load: function() {
