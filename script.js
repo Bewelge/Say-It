@@ -1,25 +1,18 @@
-var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
-var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 var colors = ["red", "green", "blue", "yellow"];
 var shapes = ["square", "circle", "triangle"];
 var text = ["red", "green", "blue", "yellow", "square", "circle", "triangle"];
 
 
+var SpeechRecognition;
+var SpeechGrammarList;
+var SpeechRecognitionEvent;
+
+
 var grammar = '#JSGF V1.0; grammar text; public <text> = ' + text.join(' | ') + ' ;'
 
-var recognition = new SpeechRecognition();
+var recognition;
+var speechRecognitionList;
 
-var speechRecognitionList = new SpeechGrammarList();
-speechRecognitionList.addFromString(colors, 1);
-speechRecognitionList.addFromString(shapes, 1);
-speechRecognitionList.addFromString(text, 1);
-
-recognition.grammars = speechRecognitionList;
-recognition.continuous = true;
-recognition.lang = 'en-US';
-recognition.interimResults = true;
-recognition.maxAlternatives = 0;
 
 var timer = 0;
 var timerLoop = null;
@@ -61,9 +54,41 @@ function init() {
   } catch (e) {
     console.log("couldnt load a highscore");
   }
-  synth = window.speechSynthesis;
-  voices = [];
-  voices = synth.getVoices()
+
+  try {
+
+    SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+    SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+    SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+
+    recognition = new SpeechRecognition();
+    speechRecognitionList = new SpeechGrammarList();
+
+
+    speechRecognitionList.addFromString(colors, 1);
+    speechRecognitionList.addFromString(shapes, 1);
+    speechRecognitionList.addFromString(text, 1);
+
+    recognition.grammars = speechRecognitionList;
+    recognition.continuous = true;
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 0;
+
+
+
+    synth = window.speechSynthesis;
+    voices = [];
+    voices = synth.getVoices()
+
+
+  } catch(e) {
+    console.log(e);
+    document.getElementById("cantplaymsg").style.display = "block"
+  }
+
+
   /*console.log(voices);
   console.log(synth);*/
   
